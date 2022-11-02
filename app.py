@@ -27,4 +27,3 @@ for name in names:
         st.plotly_chart(fig)
     else:
         st.write(name, ": no point and figure result")
-Hartalega Holdings Bhd
