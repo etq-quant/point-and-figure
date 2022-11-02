@@ -4,6 +4,11 @@ from pnf import run_pnf_plotly
 
 DATA_PATH = "data/bursa_data.csv"
 
+st.set_page_config(
+    page_title="Point and Figure",
+    layout="wide",
+)
+st.title("Point and Figure | Bursa Malaysia")
 
 @st.cache(allow_output_mutation=True)
 def load_data():
