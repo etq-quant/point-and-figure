@@ -16,8 +16,8 @@ df = load_data()
 names = st.multiselect(
     "company name", df["name"].unique(), default="Hartalega Holdings Bhd"
 )
-box_size = st.number_input("box size", value=0.1)
-reversal = st.number_input("reversal", value=3)
+box_size = st.number_input("box size", value=0.1, min_value=0.01)
+reversal = st.number_input("reversal", value=3, min_value=1)
 st.write(names)
 
 for name in names:
