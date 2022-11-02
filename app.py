@@ -26,4 +26,4 @@ for name in names:
     if fig:
         st.plotly_chart(fig)
     else:
-        st.write(name, ": no point and figure result")
+        st.write(name, ": no point and figure result, try to change box size or reversal")
