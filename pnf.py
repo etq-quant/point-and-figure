@@ -111,7 +111,7 @@ def run_pnf_plotly(tdf, BOX_SIZE, REVERSAL=3, DAY=300):
         title_text=company_name,
         title_x=0.5,
         width=min(max(len(changes) * 20, 600), 1200),
-        height=min(max((max(changes) - min(changes)) * 20, 600), 800),
+        height=min(max((max(changes) - min(changes)) * 20, 600), 1000),
         showlegend=False,
         plot_bgcolor="white",
         xaxis=dict(showline=False, showgrid=False, showticklabels=False,),
