@@ -24,7 +24,6 @@ def get_sign(val):
 
 
 def run_pnf_plotly(tdf, BOX_SIZE, REVERSAL=3, DAY=300):
-
     tdf = tdf.sort_values("date").reset_index(drop=True).copy()
     company_name = tdf["name"][0]
     sign = 1
@@ -36,8 +35,10 @@ def run_pnf_plotly(tdf, BOX_SIZE, REVERSAL=3, DAY=300):
             continue
         h = v["high"]
         l = v["low"]
+        ph = tdf.loc[k - 1, "high"]
+        pl = tdf.loc[k - 1, "low"]
         if sign == 1:
-            if h // BOX_SIZE > max_h // BOX_SIZE:
+            if h // BOX_SIZE > ph // BOX_SIZE:
                 data[-1] = [data[-1][0], h, sign]
                 max_h = h
             elif l // BOX_SIZE < (max_h // BOX_SIZE) - REVERSAL:
@@ -45,7 +46,7 @@ def run_pnf_plotly(tdf, BOX_SIZE, REVERSAL=3, DAY=300):
                 sign = -1
                 min_l = l
         elif sign == -1:
-            if l // BOX_SIZE < min_l // BOX_SIZE:
+            if l // BOX_SIZE < pl // BOX_SIZE:
                 data[-1] = [data[-1][0], l, sign]
                 min_l = l
             elif h // BOX_SIZE > (min_l // BOX_SIZE) + REVERSAL:
@@ -72,13 +73,9 @@ def run_pnf_plotly(tdf, BOX_SIZE, REVERSAL=3, DAY=300):
     # return data, changes
     if len(changes) <= 1:
         return None
+
     # one way to force dimensions is to set the figure size:
     fig = go.Figure()
-
-    # pointChanges = []
-    # for chg in changes:
-    #     pointChanges += [sign(chg)] * abs(chg)
-
     symbol = {-1: "circle", 1: "x"}
     color = {-1: "#FF6347", 1: "#89C35C"}
     fill_color = {-1: "white", 1: "#89C35C"}
@@ -103,9 +100,6 @@ def run_pnf_plotly(tdf, BOX_SIZE, REVERSAL=3, DAY=300):
                 marker_symbol=symbol.get(get_sign(chg)),
             )
         )
-
-        # chgStart += BOX * get_sign(chg) * (abs(chg) - REVERSAL-1)
-        # chgStart += BOX * sign(chg) * (abs(chg) - 2)
 
     fig.update_layout(
         title_text=company_name,
