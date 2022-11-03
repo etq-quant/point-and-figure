@@ -85,14 +85,25 @@ def run_pnf_plotly(tdf, BOX_SIZE, REVERSAL=3, DAY=300):
     fill_color = {-1: "white", 1: "#89C35C"}
     line_width = {-1: 2, 1: 0}
     chgStart = START
+
+    prev_y = None
     for ichg, d in enumerate(data):
         direction = d[-1]
-        y = np.arange(
-            round_up(min(d[:2]), BOX_SIZE),
-            round_up(max(d[:2]), BOX_SIZE) + BOX_SIZE / 100,
-            BOX_SIZE,
-        )
+        start_y = round_up(min(d[:2]), BOX_SIZE)
+        end_y = round_up(max(d[:2]), BOX_SIZE) + BOX_SIZE / 100
+        if ichg > 0 and direction == 1:
+            # previous direction is -1 (down), hence start_y = previous bar 2nd smallest point
+            start_y = prev_y
+        if ichg > 0 and direction == -1:
+            # previous direction is 1 (up), hence start_y = previous bar 2nd largest point
+            end_y = prev_y + BOX_SIZE / 100
+        y = np.arange(start_y, end_y, BOX_SIZE)
         x = [ichg + 1] * len(y)
+        if direction == 1:
+            prev_y = y[-2]
+        elif direction == -1:
+            prev_y = y[1]
+
         fig.add_trace(
             go.Scatter(
                 x=x,
