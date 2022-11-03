@@ -1,4 +1,5 @@
 import math
+import numpy as np
 import plotly.graph_objects as go
 
 
@@ -81,23 +82,36 @@ def run_pnf_plotly(tdf, BOX_SIZE, REVERSAL=3, DAY=300):
     fill_color = {-1: "white", 1: "#89C35C"}
     line_width = {-1: 2, 1: 0}
     chgStart = START
-    for ichg, chg in enumerate(changes):
-        chgStart = round(math.ceil(data[ichg][0] / BOX_SIZE) * BOX_SIZE, 4)
-        x = [ichg + 1] * abs(chg)
-        y = [chgStart + i * BOX * get_sign(chg) for i in range(abs(chg))]
+
+    prev_y = None
+    for ichg, d in enumerate(data):
+        direction = d[-1]
+        start_y = round_up(min(d[:2]), BOX_SIZE)
+        end_y = round_up(max(d[:2]), BOX_SIZE) + BOX_SIZE / 100
+        if ichg > 0 and direction == 1:
+            # previous direction is -1 (down), hence start_y = previous bar 2nd smallest point
+            start_y = prev_y
+        if ichg > 0 and direction == -1:
+            # previous direction is 1 (up), hence start_y = previous bar 2nd largest point
+            end_y = prev_y + BOX_SIZE / 100
+        y = np.arange(start_y, end_y, BOX_SIZE)
+        x = [ichg + 1] * len(y)
+        if direction == 1:
+            prev_y = y[-2]
+        elif direction == -1:
+            prev_y = y[1]
+
         fig.add_trace(
             go.Scatter(
                 x=x,
                 y=y,
                 mode="markers",
                 marker=dict(
-                    color=fill_color[get_sign(chg)],
+                    color=fill_color[direction],
                     size=8,
-                    line=dict(
-                        color=color[get_sign(chg)], width=line_width[get_sign(chg)]
-                    ),
+                    line=dict(color=color[direction], width=line_width[direction]),
                 ),
-                marker_symbol=symbol.get(get_sign(chg)),
+                marker_symbol=symbol.get(direction),
             )
         )
 
