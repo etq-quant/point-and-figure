@@ -141,5 +141,5 @@ def run_pnf_plotly(tdf, BOX_SIZE, REVERSAL=3, DAY=300):
             showticklabels=True,
         ),
     )
-    return
+    return fig
 
