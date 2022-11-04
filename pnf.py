@@ -1,8 +1,6 @@
 import math
 import numpy as np
 import plotly.graph_objects as go
-
-
 def rounding(val):
     if val > 0:
         return math.ceil(val)
@@ -10,22 +8,13 @@ def rounding(val):
         return math.floor(val)
     else:
         return 0
-
-
 def round_up(val, box):
     return round(math.ceil(val / box) * box, 4)
-
-
 def round_down(val, box):
     return round(math.floor(val / box) * box, 4)
-
-
 def get_sign(val):
     return val / abs(val)
-
-
 def run_pnf_plotly(tdf, BOX_SIZE, REVERSAL=3, DAY=300):
-
     tdf = tdf.sort_values("date").reset_index(drop=True).copy()
     company_name = tdf["name"][0]
     sign = 1
@@ -37,23 +26,24 @@ def run_pnf_plotly(tdf, BOX_SIZE, REVERSAL=3, DAY=300):
             continue
         h = v["high"]
         l = v["low"]
+        ph = tdf.loc[k - 1, "high"]
+        pl = tdf.loc[k - 1, "low"]
         if sign == 1:
-            if h // BOX_SIZE > max_h // BOX_SIZE:
+            if h // BOX_SIZE > ph // BOX_SIZE:
                 data[-1] = [data[-1][0], h, sign]
                 max_h = h
             elif l // BOX_SIZE < (max_h // BOX_SIZE) - REVERSAL:
-                data.append([l, l, -1])
+                data.append([l, max_h - BOX_SIZE, -1])
                 sign = -1
                 min_l = l
         elif sign == -1:
-            if l // BOX_SIZE < min_l // BOX_SIZE:
+            if l // BOX_SIZE < pl // BOX_SIZE:
                 data[-1] = [data[-1][0], l, sign]
                 min_l = l
             elif h // BOX_SIZE > (min_l // BOX_SIZE) + REVERSAL:
-                data.append([h, h, 1])
+                data.append([min_l + BOX_SIZE, h, 1])
                 sign = 1
                 max_h = h
-
     BOX = BOX_SIZE
     START = (
         round_down(data[0][0], BOX_SIZE)
@@ -75,35 +65,29 @@ def run_pnf_plotly(tdf, BOX_SIZE, REVERSAL=3, DAY=300):
         return None
     # one way to force dimensions is to set the figure size:
     fig = go.Figure()
-
-    # pointChanges = []
-    # for chg in changes:
-    #     pointChanges += [sign(chg)] * abs(chg)
-
     symbol = {-1: "circle", 1: "x"}
     color = {-1: "#FF6347", 1: "#89C35C"}
     fill_color = {-1: "white", 1: "#89C35C"}
     line_width = {-1: 2, 1: 0}
     chgStart = START
-
     prev_y = None
     for ichg, d in enumerate(data):
         direction = d[-1]
         start_y = round_up(min(d[:2]), BOX_SIZE)
         end_y = round_up(max(d[:2]), BOX_SIZE) + BOX_SIZE / 100
-        if ichg > 0 and direction == 1:
-            # previous direction is -1 (down), hence start_y = previous bar 2nd smallest point
-            start_y = prev_y
-        if ichg > 0 and direction == -1:
-            # previous direction is 1 (up), hence start_y = previous bar 2nd largest point
-            end_y = prev_y + BOX_SIZE / 100
+        # if ichg > 0 and direction == 1:
+        #     # previous direction is -1 (down), hence start_y = previous bar 2nd smallest point
+        #     #start_y = prev_y
+        #     start_y = round_up(min(d[:2]), BOX_SIZE)
+        # if ichg > 0 and direction == -1:
+        #     # previous direction is 1 (up), hence start_y = previous bar 2nd largest point
+        #     end_y = prev_y + BOX_SIZE / 100
         y = np.arange(start_y, end_y, BOX_SIZE)
         x = [ichg + 1] * len(y)
-        if direction == 1:
-            prev_y = y[-2]
-        elif direction == -1:
-            prev_y = y[1]
-
+        # if direction == 1:
+        #     prev_y = y[-2]
+        # elif direction == -1:
+        #     prev_y = y[1]
         fig.add_trace(
             go.Scatter(
                 x=x,
@@ -117,14 +101,10 @@ def run_pnf_plotly(tdf, BOX_SIZE, REVERSAL=3, DAY=300):
                 marker_symbol=symbol.get(direction),
             )
         )
-
-        # chgStart += BOX * get_sign(chg) * (abs(chg) - REVERSAL-1)
-        # chgStart += BOX * sign(chg) * (abs(chg) - 2)
-
     fig.update_layout(
         title_text=company_name,
         title_x=0.5,
-        width=min(max(len(changes) * 20, 600), 1200),
+        width=min(max(len(changes) * 20, 600), 1600),
         height=min(max((max(changes) - min(changes)) * 20, 600), 1000),
         showlegend=False,
         plot_bgcolor="white",
