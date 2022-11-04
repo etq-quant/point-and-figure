@@ -42,15 +42,15 @@ def run_pnf_plotly(tdf, BOX_SIZE, REVERSAL=3, DAY=300):
                 data[-1] = [data[-1][0], h, sign]
                 max_h = h
             elif l // BOX_SIZE < (max_h // BOX_SIZE) - REVERSAL:
-                data.append([l, l, -1])
+                data.append([l, max_h - BOX_SIZE, -1])
                 sign = -1
                 min_l = l
         elif sign == -1:
             if l // BOX_SIZE < min_l // BOX_SIZE:
-                data[-1] = [data[-1][0], l, sign]
+                data[-1] = [l, data[-1][1], sign]
                 min_l = l
             elif h // BOX_SIZE > (min_l // BOX_SIZE) + REVERSAL:
-                data.append([h, h, 1])
+                data.append([min_l + BOX_SIZE, h, 1])
                 sign = 1
                 max_h = h
 
@@ -59,13 +59,9 @@ def run_pnf_plotly(tdf, BOX_SIZE, REVERSAL=3, DAY=300):
         round_down(data[0][0], BOX_SIZE)
         if data[0][0] < data[0][1]
         else round_up(data[0][1], BOX_SIZE)
-    )  # tdf["high"][0] // BOX_SIZE * BOX_SIZE
+    )
     changes = [
-        c
-        if a == b
-        else round(round_up(b, BOX_SIZE) - round_down(a, BOX_SIZE), 4) / BOX_SIZE + c
-        if c == 1
-        else round(round_down(b, BOX_SIZE) - round_up(a, BOX_SIZE), 4) / BOX_SIZE + c
+        round(round_up(b, BOX_SIZE) - round_down(a, BOX_SIZE), 4) / BOX_SIZE
         for a, b, c in data
     ]
     changes = [get_sign(c) * math.ceil(abs(c)) for c in changes]
@@ -76,35 +72,31 @@ def run_pnf_plotly(tdf, BOX_SIZE, REVERSAL=3, DAY=300):
     # one way to force dimensions is to set the figure size:
     fig = go.Figure()
 
-    # pointChanges = []
-    # for chg in changes:
-    #     pointChanges += [sign(chg)] * abs(chg)
-
     symbol = {-1: "circle", 1: "x"}
     color = {-1: "#FF6347", 1: "#89C35C"}
     fill_color = {-1: "white", 1: "#89C35C"}
     line_width = {-1: 2, 1: 0}
-    chgStart = START
+    # chgStart = START
 
     prev_y = None
     for ichg, d in enumerate(data):
         direction = d[-1]
-        start_y = round_up(min(d[:2]), BOX_SIZE)
-        end_y = round_up(max(d[:2]), BOX_SIZE) + BOX_SIZE / 100
-        if prev_y is not None and direction == 1:
-            # previous direction is -1 (down), hence start_y = previous bar 2nd smallest point
-            start_y = prev_y
-        if prev_y is not None and direction == -1:
-            # previous direction is 1 (up), hence start_y = previous bar 2nd largest point
-            end_y = prev_y + BOX_SIZE / 100
+        start_y = round_up(d[0], BOX_SIZE)
+        end_y = round_up(d[1], BOX_SIZE)
+        # if prev_y is not None and direction == 1:
+        #     # previous direction is -1 (down), hence start_y = previous bar 2nd smallest point
+        #     start_y = prev_y
+        # if prev_y is not None and direction == -1:
+        #     # previous direction is 1 (up), hence start_y = previous bar 2nd largest point
+        #     end_y = prev_y + BOX_SIZE / 100
         y = np.arange(start_y, end_y, BOX_SIZE)
         if len(y) < 2:
             continue
         x = [ichg + 1] * len(y)
-        if direction == 1:
-            prev_y = y[-2]
-        elif direction == -1:
-            prev_y = y[1]
+        # if direction == 1:
+        #     prev_y = y[-2]
+        # elif direction == -1:
+        #     prev_y = y[1]
 
         fig.add_trace(
             go.Scatter(
