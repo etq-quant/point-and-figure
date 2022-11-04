@@ -69,6 +69,7 @@ def run_pnf_plotly(tdf, BOX_SIZE, REVERSAL=3, DAY=300):
     # return data, changes
     if len(changes) <= 1:
         return None
+
     # one way to force dimensions is to set the figure size:
     fig = go.Figure()
     symbol = {-1: "circle", 1: "x"}
@@ -97,6 +98,7 @@ def run_pnf_plotly(tdf, BOX_SIZE, REVERSAL=3, DAY=300):
                 marker_symbol=symbol.get(direction),
             )
         )
+        
     fig.update_layout(
         title_text=company_name,
         title_x=0.5,
