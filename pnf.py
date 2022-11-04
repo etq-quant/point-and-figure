@@ -54,12 +54,6 @@ def run_pnf_plotly(tdf, BOX_SIZE, REVERSAL=3, DAY=300):
                 sign = 1
                 max_h = h
 
-    BOX = BOX_SIZE
-    START = (
-        round_down(data[0][0], BOX_SIZE)
-        if data[0][0] < data[0][1]
-        else round_up(data[0][1], BOX_SIZE)
-    )
     changes = [
         round(round_up(b, BOX_SIZE) - round_down(a, BOX_SIZE), 4) / BOX_SIZE
         for a, b, c in data
@@ -67,7 +61,7 @@ def run_pnf_plotly(tdf, BOX_SIZE, REVERSAL=3, DAY=300):
     changes = [get_sign(c) * math.ceil(abs(c)) for c in changes]
     changes = [int(c) for c in changes]
     # return data, changes
-    if len(changes) <= 1:
+    if len(data) <= 1:
         return None
     # one way to force dimensions is to set the figure size:
     fig = go.Figure()
@@ -81,22 +75,12 @@ def run_pnf_plotly(tdf, BOX_SIZE, REVERSAL=3, DAY=300):
     prev_y = None
     for ichg, d in enumerate(data):
         direction = d[-1]
-        start_y = round_up(d[0], BOX_SIZE)
-        end_y = round_up(d[1], BOX_SIZE)
-        # if prev_y is not None and direction == 1:
-        #     # previous direction is -1 (down), hence start_y = previous bar 2nd smallest point
-        #     start_y = prev_y
-        # if prev_y is not None and direction == -1:
-        #     # previous direction is 1 (up), hence start_y = previous bar 2nd largest point
-        #     end_y = prev_y + BOX_SIZE / 100
+        start_y = round_down(d[0], BOX_SIZE)
+        end_y = round_down(d[1], BOX_SIZE)
         y = np.arange(start_y, end_y, BOX_SIZE)
         if len(y) < 2:
             continue
         x = [ichg + 1] * len(y)
-        # if direction == 1:
-        #     prev_y = y[-2]
-        # elif direction == -1:
-        #     prev_y = y[1]
 
         fig.add_trace(
             go.Scatter(
@@ -111,9 +95,6 @@ def run_pnf_plotly(tdf, BOX_SIZE, REVERSAL=3, DAY=300):
                 marker_symbol=symbol.get(direction),
             )
         )
-
-        # chgStart += BOX * get_sign(chg) * (abs(chg) - REVERSAL-1)
-        # chgStart += BOX * sign(chg) * (abs(chg) - 2)
 
     fig.update_layout(
         title_text=company_name,
