@@ -81,8 +81,15 @@ def run_pnf_plotly(tdf, BOX_SIZE, REVERSAL=3, DAY=300):
         direction = d[-1]
         start_y = round_up(min(d[:2]), BOX_SIZE)
         end_y = round_up(max(d[:2]), BOX_SIZE) + BOX_SIZE / 100
-
+        if prev_y is not None and direction == 1:
+            # previous direction is -1 (down), hence start_y = previous bar 2nd smallest point
+            start_y = prev_y
+        if prev_y is not None and direction == -1:
+            # previous direction is 1 (up), hence start_y = previous bar 2nd largest point
+            end_y = prev_y + BOX_SIZE / 100
         y = np.arange(start_y, end_y, BOX_SIZE)
+        if len(y) < 2:
+            continue
         x = [ichg + 1] * len(y)
 
         fig.add_trace(
