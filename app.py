@@ -5,10 +5,10 @@ from pnf import run_pnf_plotly
 DATA_PATH = "data/bursa_data.csv"
 
 st.set_page_config(
-    page_title="Point and Figure",
-    layout="wide",
+    page_title="Point and Figure", layout="wide",
 )
 st.title("Point and Figure | Bursa Malaysia")
+
 
 @st.cache(allow_output_mutation=True)
 def load_data():
@@ -21,14 +21,27 @@ df = load_data()
 names = st.multiselect(
     "company name", df["name"].unique(), default="Hartalega Holdings Bhd"
 )
-box_size = st.number_input("box size", value=0.1, min_value=0.01)
-reversal = st.number_input("reversal", value=3, min_value=1)
+
+
 st.write(names)
 
+
+box_size = {}
+reversal = {}
 for name in names:
     tdf = df[df["name"] == name]
-    fig = run_pnf_plotly(tdf, box_size, reversal)
+    box_size[name] = round(tdf["px"].diff()[-30:].std(), 2)
+
+    st.header(name)
+    reversal[name] = st.number_input(f"reversal of {name}", value=3, min_value=1)
+    box_size[name] = st.number_input(
+        f"box size of {name}", value=box_size[name], min_value=0.01
+    )
+
+    fig = run_pnf_plotly(tdf, box_size[name], reversal[name])
     if fig:
         st.plotly_chart(fig)
     else:
-        st.write(name, ": no point and figure result, try to change box size or reversal")
+        st.write(
+            name, ": no point and figure result, try to change box size or reversal"
+        )
