@@ -30,7 +30,7 @@ box_size = {}
 reversal = {}
 for name in names:
     tdf = df[df["name"] == name]
-    box_size[name] = round(tdf["px"].diff()[-30:].std(), 2)
+    box_size[name] = round(tdf["px"].diff().iloc[-30:].std(), 2)
     st.markdown("<hr style='border:2px solid gray'>", True)
     st.header(name)
     reversal[name] = st.number_input(f"reversal of {name}", value=3, min_value=1)
