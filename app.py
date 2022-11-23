@@ -40,7 +40,7 @@ for name in names:
 
     fig = run_pnf_plotly(tdf, box_size[name], reversal[name])
     if fig:
-        st.plotly_chart(fig, use_container_width=True, height=fig.layout.height)
+        st.plotly_chart(fig, height=fig.layout.height)
     else:
         st.write(
             name, ": no point and figure result, try to change box size or reversal"
