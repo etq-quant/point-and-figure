@@ -50,4 +50,4 @@ if __name__ == "__main__":
     repo.git.add(update=True)
     repo.index.commit(COMMIT_MESSAGE)
     origin.push("main")
-    send_telegram()
+    #send_telegram()
