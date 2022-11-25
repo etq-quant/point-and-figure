@@ -37,7 +37,7 @@ def send_telegram():
 
 if __name__ == "__main__":
 
-    PATH_OF_GIT_REPO =  git_path # make sure .git folder is properly configured
+    PATH_OF_GIT_REPO = git_path # make sure .git folder is properly configured
     COMMIT_MESSAGE = "[bot] commit"
     repo = Repo(PATH_OF_GIT_REPO)
     origin = repo.remote(name="origin")
