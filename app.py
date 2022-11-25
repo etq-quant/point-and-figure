@@ -13,7 +13,6 @@ st.title("Point and Figure | Bursa Malaysia")
 @st.cache(allow_output_mutation=True)
 def load_data():
     df = pd.read_csv(DATA_PATH)
-
     return df
 
 
