@@ -9,12 +9,13 @@ from app_config import Bot, git_path
 import requests
 
 from joblib import Parallel, delayed
-from query_helper import query_id, query_latest_table, get_ids
+from query_helper import query_id, query_latest_table, get_ids, get_dates
 
 def do_task(_id):
     price_df = query_id(_id, ["prices_kl"])
     gics_df = query_latest_table(table="gics_kl")
     price_df["name"] = gics_df.set_index("id").loc[_id, "company_common_name"]
+    price_df = price_df.loc[min_date:]
     return price_df
 
 def run():
@@ -42,6 +43,7 @@ if __name__ == "__main__":
     origin = repo.remote(name="origin")
     origin.pull("main")
 
+    min_date = get_dates()[-256]
     run()
 
     repo.index.add([r"data/bursa_data.csv"])
