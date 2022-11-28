@@ -22,7 +22,7 @@ def run():
     ids = get_ids()
     dfs = Parallel(n_jobs=5)(delayed(do_task)(_id) for _id in tqdm(ids))
     df = pd.concat(dfs)
-    df = df.reset_index()[['date', 'name', 'high', 'low']]
+    df = df.reset_index()[['date', 'name', 'high', 'low','close']]
     df.to_csv(r'data/bursa_data.csv', index=False)
 
 def send_telegram():
